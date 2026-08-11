@@ -111,7 +111,10 @@ public sealed partial class PaperWindow
     }
 
     internal void CommitPendingNoteContentForSave()
-        => CommitPendingNoteContent();
+    {
+        CommitPendingNoteContent();
+        CommitNoteTags();
+    }
 
     private void CommitPendingNoteContent()
     {

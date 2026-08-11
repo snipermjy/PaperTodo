@@ -424,9 +424,6 @@ PaperTodo を手動でもう一度開いてください。問題が繰り返さ�
   <data name="SettingsMaxTitleLength" xml:space="preserve">
     <value>タイトル文字数上限</value>
   </data>
-  <data name="SettingsCapsuleCollapseAll" xml:space="preserve">
-    <value>メインカプセルを表示</value>
-  </data>
   <data name="SettingsShowDeepCapsuleWhileExpanded" xml:space="preserve">
     <value>展開中も端のカプセルを残す</value>
   </data>
@@ -438,18 +435,6 @@ PaperTodo を手動でもう一度開いてください。問題が繰り返さ�
   </data>
   <data name="SettingsHideEdgeCapsuleCloseButtonOnHover" xml:space="preserve">
     <value>閉じるボタンを隠す</value>
-  </data>
-  <data name="CapsuleCollapseAllLabel" xml:space="preserve">
-    <value>折りたたむ</value>
-  </data>
-  <data name="CapsuleCollapseAllExpandedTip" xml:space="preserve">
-    <value>現在のカプセル列を折りたたむ</value>
-  </data>
-  <data name="CapsuleCollapseAllCollapsedTip" xml:space="preserve">
-    <value>現在のカプセル列を展開</value>
-  </data>
-  <data name="CapsuleCollapseAllCountFormat" xml:space="preserve">
-    <value>{0} 個</value>
   </data>
   <data name="TrayExit" xml:space="preserve">
     <value>終了</value>
@@ -618,9 +603,6 @@ papertodo と PaperTodo_Bold（.ttf/.otf）の両方を置いてください。<
   </data>
   <data name="TipCollapseExpandedDeepCapsuleOnClick" xml:space="preserve">
     <value>端から開いた紙片に対し、同じカプセルをもう一度クリックすると戻します。</value>
-  </data>
-  <data name="TipCapsuleCollapseAll" xml:space="preserve">
-    <value>列の先頭にメインカプセルを表示し、現在の列を一括で折りたたみ／展開します。</value>
   </data>
   <data name="TipHideEdgeCapsuleCloseButtonOnHover" xml:space="preserve">
     <value>ホバー時も通常どおり伸びますが、追加領域は閉じるボタンのない通常のカプセル領域として動作します。閉じる場合は右クリックメニューの「隠す」を使います。</value>
@@ -1374,4 +1356,20 @@ papertodo と PaperTodo_Bold（.ttf/.otf）の両方を置いてください。<
   <data name="PluginsStatusRunning" xml:space="preserve">
     <value>プラグインは実行中です</value>
   </data>
+  <data name="ObsidianSync" xml:space="preserve"><value>Obsidian 同期</value></data>
+  <data name="ObsidianVaultPath" xml:space="preserve"><value>Vault パス</value></data>
+  <data name="ObsidianOutputDirectory" xml:space="preserve"><value>出力フォルダー</value></data>
+  <data name="ObsidianSyncTime" xml:space="preserve"><value>毎日の同期時刻</value></data>
+  <data name="ObsidianSyncNow" xml:space="preserve"><value>今すぐ同期</value></data>
+  <data name="ObsidianSyncLastAt" xml:space="preserve"><value>最終同期: {0}</value></data>
+  <data name="ObsidianSyncNotConfigured" xml:space="preserve"><value>先に Obsidian Vault のパスを設定してください</value></data>
+  <data name="ObsidianSyncNotYet" xml:space="preserve"><value>まだ同期されていません</value></data>
+  <data name="ObsidianSyncFailed" xml:space="preserve"><value>同期に失敗しました。Vault パスと出力フォルダーを確認してください。</value></data>
+  <data name="ObsidianSyncBusy" xml:space="preserve"><value>同期中</value></data>
+  <data name="ObsidianSyncCompleted" xml:space="preserve"><value>Obsidian に同期しました</value></data>
+  <data name="NoteTagsHint" xml:space="preserve"><value>タグ（スペース区切り）</value></data>
+  <data name="CapsuleQuickNewTodo" xml:space="preserve"><value>新しいToDo</value></data>
+  <data name="CapsuleQuickNewNote" xml:space="preserve"><value>アイデアを記録</value></data>
+  <data name="CapsuleQuickSync" xml:space="preserve"><value>Obsidianへ同期</value></data>
+  <data name="TodoItemPlaceholder" xml:space="preserve"><value>ToDoを入力</value></data>
 </root>

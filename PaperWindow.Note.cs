@@ -16,6 +16,7 @@ namespace PaperTodo;
 public sealed partial class PaperWindow
 {
     internal const int NoteTextMaxLength = 100000;
+    private TextBox? _noteTagsBox;
     private static readonly object PersistentScriptProcessLock = new();
     private static readonly Dictionary<string, Process> PersistentScriptProcesses = new(StringComparer.OrdinalIgnoreCase);
     private static readonly object ActiveScriptProcessLock = new();
@@ -228,10 +229,41 @@ public sealed partial class PaperWindow
     }
 
 
+    private void CommitNoteTags(TextBox tagsBox)
+    {
+        var tags = tagsBox.Text
+            .Split(new[] { ' ', '\t', '\r', '\n', ',', '，', ';', '；' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(tag => tag.Trim())
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .Select(tag => tag.StartsWith('#') ? tag : $"#{tag}")
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        var normalized = string.Join(" ", tags);
+        if (string.Equals(_paper.Tags, normalized, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _paper.Tags = normalized;
+        _paper.UpdatedAt = DateTimeOffset.Now;
+        tagsBox.Text = normalized;
+        _controller.MarkDirty();
+    }
+
+    private void CommitNoteTags()
+    {
+        if (_noteTagsBox != null)
+        {
+            CommitNoteTags(_noteTagsBox);
+        }
+    }
+
     private UIElement BuildNoteBody()
     {
         var presenterGeneration = BeginNotePresenterSession();
         var host = new Grid();
+        host.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        host.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
         _noteBox = new MarkdownTextBox
         {
@@ -267,7 +299,33 @@ public sealed partial class PaperWindow
         // New MarkdownTextBox defaults to rendering images; re-apply hide/collapse/minimize policy.
         SyncNoteImagePresentationState();
 
+        Grid.SetRow(box, 0);
         host.Children.Add(box);
+
+        _noteTagsBox = new TextBox
+        {
+            Text = _paper.Tags ?? "",
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Foreground = Theme.WeakTextBrush,
+            CaretBrush = Theme.TextBrush,
+            FontSize = AppTypography.Scale(11),
+            Margin = new Thickness(12, 0, 12, 6),
+            ToolTip = Strings.Get("NoteTagsHint")
+        };
+        var tagsBox = _noteTagsBox;
+        tagsBox.LostKeyboardFocus += (_, _) => CommitNoteTags(tagsBox);
+        tagsBox.PreviewKeyDown += (_, e) =>
+        {
+            if (e.Key == Key.Enter)
+            {
+                CommitNoteTags(tagsBox);
+                Keyboard.ClearFocus();
+                e.Handled = true;
+            }
+        };
+        Grid.SetRow(tagsBox, 1);
+        host.Children.Add(tagsBox);
         var isPreviewing = false;
         var isEnteringEditorFromPreview = false;
         var isInteractingWithImage = false;
@@ -670,6 +728,7 @@ public sealed partial class PaperWindow
             }
 
             _noteContentDirty = true;
+            _paper.UpdatedAt = DateTimeOffset.Now;
             var wasScriptCapsule = _liveIsScriptCapsule;
             var isScriptCapsule = IsScriptCapsuleDocument(box);
             _liveIsScriptCapsule = isScriptCapsule;

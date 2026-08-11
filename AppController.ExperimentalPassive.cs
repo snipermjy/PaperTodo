@@ -152,11 +152,6 @@ public sealed partial class AppController
         {
             window.SetExperimentalAllSurfacesPassive(enabled);
         }
-        foreach (var master in _masterCapsules.Values.ToList())
-        {
-            master.SetExperimentalPassive(enabled);
-        }
-
         RefreshTrayMenu();
     }
 }

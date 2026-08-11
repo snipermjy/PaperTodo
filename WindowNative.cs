@@ -5,8 +5,7 @@ using System.Windows.Interop;
 namespace PaperTodo;
 
 // Shared Win32 window-style / z-order helpers for the app's borderless top-level windows
-// (paper windows, the deep-capsule slot host, the master capsule). Previously duplicated
-// verbatim across PaperWindow.Native and MasterCapsuleWindow.
+// (paper windows and the deep-capsule slot host).
 internal static class WindowNative
 {
     private const int GwlExStyle = -20;

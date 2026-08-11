@@ -424,9 +424,6 @@ Error: {0}</value>
   <data name="SettingsMaxTitleLength" xml:space="preserve">
     <value>Title length limit</value>
   </data>
-  <data name="SettingsCapsuleCollapseAll" xml:space="preserve">
-    <value>Show main capsule</value>
-  </data>
   <data name="SettingsShowDeepCapsuleWhileExpanded" xml:space="preserve">
     <value>Keep edge capsule when expanded</value>
   </data>
@@ -438,18 +435,6 @@ Error: {0}</value>
   </data>
   <data name="SettingsHideEdgeCapsuleCloseButtonOnHover" xml:space="preserve">
     <value>Hide edge close button</value>
-  </data>
-  <data name="CapsuleCollapseAllLabel" xml:space="preserve">
-    <value>Collapse</value>
-  </data>
-  <data name="CapsuleCollapseAllExpandedTip" xml:space="preserve">
-    <value>Collapse current capsule queue</value>
-  </data>
-  <data name="CapsuleCollapseAllCollapsedTip" xml:space="preserve">
-    <value>Expand current capsule queue</value>
-  </data>
-  <data name="CapsuleCollapseAllCountFormat" xml:space="preserve">
-    <value>{0} pc</value>
   </data>
   <data name="TrayExit" xml:space="preserve">
     <value>Exit</value>
@@ -605,9 +590,6 @@ About 5 full-width characters on one line, 10 on multiline.</value>
   </data>
   <data name="TipCollapseExpandedDeepCapsuleOnClick" xml:space="preserve">
     <value>If the paper is already expanded from the edge, click the same capsule again to retract it.</value>
-  </data>
-  <data name="TipCapsuleCollapseAll" xml:space="preserve">
-    <value>Show a master capsule at the top of the queue to collapse or expand it.</value>
   </data>
   <data name="TipHideEdgeCapsuleCloseButtonOnHover" xml:space="preserve">
     <value>Edge capsules still extend on hover; the extra area acts like the main capsule without a close button. Use Hide in the context menu to close it.</value>
@@ -1374,4 +1356,20 @@ When off, open at the docked edge or remembered position.</value>
   <data name="PluginsStatusRunning" xml:space="preserve">
     <value>Plugin is running</value>
   </data>
+  <data name="ObsidianSync" xml:space="preserve"><value>Obsidian Sync</value></data>
+  <data name="ObsidianVaultPath" xml:space="preserve"><value>Vault path</value></data>
+  <data name="ObsidianOutputDirectory" xml:space="preserve"><value>Output folder</value></data>
+  <data name="ObsidianSyncTime" xml:space="preserve"><value>Daily sync time</value></data>
+  <data name="ObsidianSyncNow" xml:space="preserve"><value>Sync now</value></data>
+  <data name="ObsidianSyncLastAt" xml:space="preserve"><value>Last sync: {0}</value></data>
+  <data name="ObsidianSyncNotConfigured" xml:space="preserve"><value>Set an Obsidian vault path first</value></data>
+  <data name="ObsidianSyncNotYet" xml:space="preserve"><value>Not synced yet</value></data>
+  <data name="ObsidianSyncFailed" xml:space="preserve"><value>Sync failed. Check the vault path and output folder.</value></data>
+  <data name="ObsidianSyncBusy" xml:space="preserve"><value>Syncing</value></data>
+  <data name="ObsidianSyncCompleted" xml:space="preserve"><value>Synced to Obsidian</value></data>
+  <data name="NoteTagsHint" xml:space="preserve"><value>Tags (space-separated)</value></data>
+  <data name="CapsuleQuickNewTodo" xml:space="preserve"><value>New to-do</value></data>
+  <data name="CapsuleQuickNewNote" xml:space="preserve"><value>Capture idea</value></data>
+  <data name="CapsuleQuickSync" xml:space="preserve"><value>Sync to Obsidian</value></data>
+  <data name="TodoItemPlaceholder" xml:space="preserve"><value>Enter a to-do</value></data>
 </root>

@@ -6,8 +6,7 @@ internal readonly record struct EdgeCapsuleQueueMember(
 
 internal sealed record EdgeCapsuleQueue(
     string Key,
-    IReadOnlyList<PaperData> Papers,
-    bool HasMaster);
+    IReadOnlyList<PaperData> Papers);
 
 internal sealed class EdgeCapsuleQueuePlan
 {
@@ -50,13 +49,11 @@ internal sealed class EdgeCapsuleArrangeGate
 
 /// <summary>
 /// Pure queue planner. AppController decides membership; this coordinator is the sole owner of
-/// per-queue indices, master offsets and slot counts.
+/// per-queue indices and slot counts.
 /// </summary>
 internal static class EdgeCapsuleQueueCoordinator
 {
-    public static EdgeCapsuleQueuePlan Build(
-        IEnumerable<EdgeCapsuleQueueMember> members,
-        bool showMaster)
+    public static EdgeCapsuleQueuePlan Build(IEnumerable<EdgeCapsuleQueueMember> members)
     {
         var queueMembers = new Dictionary<string, List<PaperData>>(StringComparer.Ordinal);
         var queueOrder = new List<string>();
@@ -76,16 +73,13 @@ internal static class EdgeCapsuleQueueCoordinator
         foreach (var key in queueOrder)
         {
             var papers = queueMembers[key];
-            var hasMaster = showMaster && papers.Count > 0;
-            var visualOffset = hasMaster ? 1 : 0;
-            var slotCount = papers.Count + visualOffset;
-            queues.Add(new EdgeCapsuleQueue(key, papers, hasMaster));
+            var slotCount = papers.Count;
+            queues.Add(new EdgeCapsuleQueue(key, papers));
 
             for (var index = 0; index < papers.Count; index++)
             {
                 placements[papers[index].Id] = new EdgeCapsulePlacement(
                     index,
-                    visualOffset,
                     slotCount);
             }
         }

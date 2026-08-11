@@ -6,14 +6,13 @@ namespace PaperTodo;
 /// </summary>
 internal readonly record struct EdgeCapsulePlacement(
     int Index,
-    int VisualOffset,
     int SlotCount)
 {
-    public static EdgeCapsulePlacement None => new(-1, 0, 1);
-    public int VisualIndex => Index + VisualOffset;
+    public static EdgeCapsulePlacement None => new(-1, 1);
+    public int VisualIndex => Index;
     public bool IsPlaced => Index >= 0;
     public EdgeCapsulePlacement Normalize() => IsPlaced
-        ? new EdgeCapsulePlacement(Math.Max(0, Index), Math.Max(0, VisualOffset), Math.Max(1, SlotCount))
+        ? new EdgeCapsulePlacement(Math.Max(0, Index), Math.Max(1, SlotCount))
         : None;
 }
 

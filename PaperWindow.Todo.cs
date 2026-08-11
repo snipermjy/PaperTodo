@@ -403,6 +403,7 @@ public sealed partial class PaperWindow
         var text = new TodoTextBox
         {
             Text = item.Text,
+            Placeholder = Strings.Get("TodoItemPlaceholder"),
             IsDone = item.Done,
             BorderThickness = new Thickness(0),
             Background = Brushes.Transparent,
@@ -423,6 +424,7 @@ public sealed partial class PaperWindow
             AcceptsReturn = false,
             MaxLength = TodoTextMaxLength
         };
+        System.Windows.Automation.AutomationProperties.SetName(text, Strings.Get("TodoItemPlaceholder"));
 
         _todoEditors[item.Id] = text;
 

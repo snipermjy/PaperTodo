@@ -19,6 +19,10 @@ public sealed partial class AppController
 {
     private const string AuthorName = "Designed by trigger";
     private const string AuthorGithubUrl = "https://github.com/snownico0722";
+    private TextBox? _settingsObsidianVaultTextBox;
+    private TextBox? _settingsObsidianOutputTextBox;
+    private TextBox? _settingsObsidianTimeTextBox;
+    private TextBlock? _settingsObsidianStatusText;
 
     private void SetTheme(string theme)
     {
@@ -59,8 +63,6 @@ public sealed partial class AppController
         {
             window.UpdateTheme();
         }
-        foreach (var m in _masterCapsules.Values) m.UpdateTheme();
-
         RebuildTrayMenu();
         RefreshSettingsWindowContent();
     }
@@ -586,6 +588,138 @@ public sealed partial class AppController
         {
             CommitExternalMarkdownExtension(_settingsExternalMarkdownTextBox, saveImmediately);
         }
+
+        CommitObsidianSyncSettings(saveImmediately);
+    }
+
+    private UIElement BuildObsidianSyncSettings()
+    {
+        var panel = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
+
+        TextBox Field(string value)
+        {
+            return new TextBox
+            {
+                Text = value,
+                Foreground = TrayTextBrush,
+                CaretBrush = TrayTextBrush,
+                Background = Brushes.Transparent,
+                BorderBrush = TrayBorderBrush,
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(8, 4, 8, 4),
+                Margin = new Thickness(0, 3, 0, 6),
+                FontSize = AppTypography.Scale(13),
+                Height = AppTypography.FitChrome(28),
+                VerticalContentAlignment = VerticalAlignment.Center,
+                Style = BuildSettingsTextBoxStyle()
+            };
+        }
+
+        panel.Children.Add(SettingsSectionLabel(Strings.Get("ObsidianSync")));
+        panel.Children.Add(SettingsFieldLabel(Strings.Get("ObsidianVaultPath"), topMargin: 6));
+        _settingsObsidianVaultTextBox = Field(State.ObsidianVaultPath);
+        panel.Children.Add(_settingsObsidianVaultTextBox);
+
+        panel.Children.Add(SettingsFieldLabel(Strings.Get("ObsidianOutputDirectory")));
+        _settingsObsidianOutputTextBox = Field(State.ObsidianOutputDirectory);
+        panel.Children.Add(_settingsObsidianOutputTextBox);
+
+        panel.Children.Add(SettingsFieldLabel(Strings.Get("ObsidianSyncTime")));
+        _settingsObsidianTimeTextBox = Field(State.ObsidianSyncTime.ToString(@"hh\:mm"));
+        panel.Children.Add(_settingsObsidianTimeTextBox);
+
+        var syncButton = new Button
+        {
+            Content = Strings.Get("ObsidianSyncNow"),
+            Foreground = TrayTextBrush,
+            Background = Brushes.Transparent,
+            BorderBrush = TrayBorderBrush,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(10, 4, 10, 4),
+            Cursor = System.Windows.Input.Cursors.Hand,
+            HorizontalAlignment = HorizontalAlignment.Left
+        };
+        syncButton.Click += async (_, _) =>
+        {
+            CommitObsidianSyncSettings();
+            var result = await SyncObsidianTodayAsync();
+            if (_settingsObsidianStatusText != null)
+            {
+                _settingsObsidianStatusText.Text = ObsidianSyncStatusText(result);
+            }
+        };
+        panel.Children.Add(syncButton);
+
+        _settingsObsidianStatusText = new TextBlock
+        {
+            Text = ObsidianSyncStatusText(),
+            Foreground = Theme.WeakTextBrush,
+            FontSize = AppTypography.Scale(11),
+            Margin = new Thickness(0, 6, 0, 0),
+            TextWrapping = TextWrapping.Wrap
+        };
+        panel.Children.Add(_settingsObsidianStatusText);
+
+        return panel;
+    }
+
+    private string ObsidianSyncStatusText(ObsidianSyncResult? result = null)
+    {
+        if (result != null)
+        {
+            return result.Status switch
+            {
+                ObsidianSyncStatus.Succeeded => Strings.Format(
+                    "ObsidianSyncLastAt",
+                    DateTime.Now.ToString("g", CultureInfo.CurrentCulture)),
+                ObsidianSyncStatus.Disabled => Strings.Get("ObsidianSyncNotConfigured"),
+                ObsidianSyncStatus.Busy => Strings.Get("ObsidianSyncBusy"),
+                _ => Strings.Get("ObsidianSyncFailed")
+            };
+        }
+
+        if (string.IsNullOrWhiteSpace(State.ObsidianVaultPath))
+        {
+            return Strings.Get("ObsidianSyncNotConfigured");
+        }
+
+        return State.LastObsidianSyncAt is { } lastSync
+            ? Strings.Format(
+                "ObsidianSyncLastAt",
+                lastSync.LocalDateTime.ToString("g", CultureInfo.CurrentCulture))
+            : Strings.Get("ObsidianSyncNotYet");
+    }
+
+    private void CommitObsidianSyncSettings(bool saveImmediately = true)
+    {
+        if (_settingsObsidianVaultTextBox == null ||
+            _settingsObsidianOutputTextBox == null ||
+            _settingsObsidianTimeTextBox == null)
+        {
+            return;
+        }
+
+        State.ObsidianVaultPath = _settingsObsidianVaultTextBox.Text.Trim();
+        State.ObsidianOutputDirectory = _settingsObsidianOutputTextBox.Text.Trim();
+        if (TimeSpan.TryParse(_settingsObsidianTimeTextBox.Text.Trim(), out var time) &&
+            time >= TimeSpan.Zero &&
+            time < TimeSpan.FromDays(1))
+        {
+            State.ObsidianSyncTime = time;
+        }
+        else
+        {
+            _settingsObsidianTimeTextBox.Text = State.ObsidianSyncTime.ToString(@"hh\:mm");
+        }
+
+        if (saveImmediately)
+        {
+            SaveNow();
+        }
+        else
+        {
+            MarkDirty();
+        }
     }
 
     private void CommitExternalMarkdownExtension(TextBox textBox, bool saveImmediately = true)
@@ -884,7 +1018,6 @@ public sealed partial class AppController
             _settingsDeepCapsuleExpandedSlotCheckBox = null;
             _settingsRememberDeepCapsuleExpandedPositionCheckBox = null;
             _settingsCollapseExpandedDeepCapsuleOnClickCheckBox = null;
-            _settingsCapsuleCollapseAllCheckBox = null;
             _settingsPageScrollViewer = null;
             _settingsPageScrollViewerPage = null;
             DiscardShortcutDraft();
@@ -980,10 +1113,6 @@ public sealed partial class AppController
             window.UpdateTypography();
         }
 
-        foreach (var masterCapsule in _masterCapsules.Values)
-        {
-            masterCapsule.UpdateTypography();
-        }
         ArrangeDeepCapsules(animate: false);
     }
 
@@ -1951,6 +2080,10 @@ public sealed partial class AppController
     private UIElement BuildGeneralSettingsPage()
     {
         _settingsExternalMarkdownTextBox = null;
+        _settingsObsidianVaultTextBox = null;
+        _settingsObsidianOutputTextBox = null;
+        _settingsObsidianTimeTextBox = null;
+        _settingsObsidianStatusText = null;
         _settingsHidePapersFromTaskbarCheckBox = null;
         _settingsHidePapersFromWindowSwitcherCheckBox = null;
         _settingsCapsuleModeCheckBox = null;
@@ -1958,7 +2091,6 @@ public sealed partial class AppController
         _settingsDeepCapsuleExpandedSlotCheckBox = null;
         _settingsRememberDeepCapsuleExpandedPositionCheckBox = null;
         _settingsCollapseExpandedDeepCapsuleOnClickCheckBox = null;
-        _settingsCapsuleCollapseAllCheckBox = null;
 
         var columns = new Grid
         {
@@ -2023,13 +2155,10 @@ public sealed partial class AppController
         _settingsDeepCapsuleExpandedSlotCheckBox = SettingsToggle(Strings.Get("SettingsShowDeepCapsuleWhileExpanded"), State.ShowDeepCapsuleWhileExpanded, ToggleDeepCapsuleExpandedSlot);
         _settingsRememberDeepCapsuleExpandedPositionCheckBox = SettingsToggle(Strings.Get("SettingsRememberDeepCapsuleExpandedPosition"), State.RememberDeepCapsuleExpandedPosition, ToggleRememberDeepCapsuleExpandedPosition);
         _settingsCollapseExpandedDeepCapsuleOnClickCheckBox = SettingsToggle(Strings.Get("SettingsCollapseExpandedDeepCapsuleOnClick"), State.CollapseExpandedDeepCapsuleOnClick, ToggleCollapseExpandedDeepCapsuleOnClick);
-        _settingsCapsuleCollapseAllCheckBox = SettingsToggle(Strings.Get("SettingsCapsuleCollapseAll"), State.UseCapsuleCollapseAll, ToggleCapsuleCollapseAll);
         rightColumn.Children.Add(WrapWithHint(_settingsCapsuleModeCheckBox, "TipCapsuleMode"));
         rightColumn.Children.Add(WrapWithHint(_settingsDeepCapsuleModeCheckBox, "TipDeepCapsuleMode"));
         rightColumn.Children.Add(WrapWithHint(_settingsDeepCapsuleExpandedSlotCheckBox, "TipShowDeepCapsuleWhileExpanded"));
         rightColumn.Children.Add(WrapWithHint(_settingsRememberDeepCapsuleExpandedPositionCheckBox, "TipRememberDeepCapsuleExpandedPosition"));
-        // Master-capsule control sits one slot above "collapse expanded on click".
-        rightColumn.Children.Add(WrapWithHint(_settingsCapsuleCollapseAllCheckBox, "TipCapsuleCollapseAll"));
         rightColumn.Children.Add(WrapWithHint(_settingsCollapseExpandedDeepCapsuleOnClickCheckBox, "TipCollapseExpandedDeepCapsuleOnClick"));
         RefreshSettingsCapsuleToggleStates();
         if (advanced)
@@ -2074,6 +2203,7 @@ public sealed partial class AppController
         var runLinkedScriptCapsulesToggle = SettingsToggle(Strings.Get("SettingsRunLinkedScriptCapsulesOnClick"), State.RunLinkedScriptCapsulesOnClick, ToggleRunLinkedScriptCapsulesOnClick);
         runLinkedScriptCapsulesToggle.IsEnabled = State.EnableTodoNoteLinks;
         rightColumn.Children.Add(WrapWithHint(runLinkedScriptCapsulesToggle, "TipRunLinkedScriptCapsulesOnClick"));
+        rightColumn.Children.Add(BuildObsidianSyncSettings());
         var separator = new Border
         {
             Width = 1,
@@ -2274,7 +2404,6 @@ public sealed partial class AppController
         State.ShowDeepCapsuleWhileExpanded = true;
         State.HideEdgeCapsuleCloseButtonOnHover = false;
         State.RememberDeepCapsuleExpandedPosition = true;
-        State.UseCapsuleCollapseAll = true;
         State.CollapseExpandedDeepCapsuleOnClick = false;
         State.MaxTitleLength = PaperTitles.DefaultMaxTitleLength;
         State.DeepCapsuleTitleMeasureCharacterLimit = 0;
@@ -2849,11 +2978,6 @@ public sealed partial class AppController
             _settingsCollapseExpandedDeepCapsuleOnClickCheckBox.IsEnabled = State.UseCapsuleMode && State.UseDeepCapsuleMode &&
                 State.ShowDeepCapsuleWhileExpanded;
         }
-        if (_settingsCapsuleCollapseAllCheckBox != null)
-        {
-            _settingsCapsuleCollapseAllCheckBox.IsChecked = State.UseCapsuleCollapseAll;
-            _settingsCapsuleCollapseAllCheckBox.IsEnabled = State.UseCapsuleMode && State.UseDeepCapsuleMode;
-        }
     }
 
     private void RefreshSettingsSystemVisibilityToggleStates()
@@ -3300,8 +3424,6 @@ public sealed partial class AppController
             window.UpdateToolTipSetting();
         }
 
-        foreach (var m in _masterCapsules.Values) m.UpdateToolTipSetting();
-
         if (_settingsWindow != null)
         {
             ApplyToolTipSetting(_settingsWindow);
@@ -3326,9 +3448,6 @@ public sealed partial class AppController
         if (!State.UseCapsuleMode)
         {
             State.UseDeepCapsuleMode = false;
-            State.UseCapsuleCollapseAll = false;
-            State.CapsuleCollapseAllActive = false;
-            State.CapsuleCollapseAllActiveQueues.Clear();
             ResetDeepCapsuleStartTopMargins();
         }
 
@@ -3482,9 +3601,6 @@ public sealed partial class AppController
         }
         else if (!State.UseDeepCapsuleMode)
         {
-            State.UseCapsuleCollapseAll = false;
-            State.CapsuleCollapseAllActive = false;
-            State.CapsuleCollapseAllActiveQueues.Clear();
             ResetDeepCapsuleStartTopMargins();
         }
 

@@ -513,6 +513,11 @@ public sealed partial class AppController
         }
 
         menu.Items.Add(TraySeparator());
+        menu.Items.Add(TrayItem(
+            menu,
+            Strings.Get("ObsidianSyncNow"),
+            () => _ = SyncObsidianTodayWithFeedbackAsync()));
+        menu.Items.Add(TraySeparator());
         if (HasExperimentalPassiveSurfaces)
         {
             menu.Items.Add(TrayItem(
@@ -572,6 +577,22 @@ public sealed partial class AppController
             InvokeTrayAction(menu, action, flushDesktopComposition);
         };
         return item;
+    }
+
+    internal async Task SyncObsidianTodayWithFeedbackAsync()
+    {
+        var result = await SyncObsidianTodayAsync();
+        var message = result.Status switch
+        {
+            ObsidianSyncStatus.Succeeded => Strings.Get("ObsidianSyncCompleted"),
+            ObsidianSyncStatus.Disabled => Strings.Get("ObsidianSyncNotConfigured"),
+            ObsidianSyncStatus.Failed => Strings.Get("ObsidianSyncFailed"),
+            _ => Strings.Get("ObsidianSyncBusy")
+        };
+        var icon = result.Status == ObsidianSyncStatus.Succeeded
+            ? BalloonIcon.Info
+            : BalloonIcon.Warning;
+        _trayIcon?.ShowBalloonTip(Strings.Get("ObsidianSync"), message, icon);
     }
 
     private static void InvokeTrayAction(

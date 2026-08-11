@@ -1222,8 +1222,7 @@ public sealed partial class AppController
             ? DeepCapsuleSides.Right
             : DeepCapsuleSides.Left;
         var queuePlan = EdgeCapsuleQueueCoordinator.Build(
-            papers.Select(paper => new EdgeCapsuleQueueMember(paper, QueueKey(paper))),
-            State.UseCapsuleCollapseAll);
+            papers.Select(paper => new EdgeCapsuleQueueMember(paper, QueueKey(paper))));
         var queuesByKey = queuePlan.Queues.ToDictionary(queue => queue.Key, StringComparer.Ordinal);
 
         foreach (var monitorName in EdgeShortcutMonitorSearchOrder())

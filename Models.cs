@@ -406,9 +406,6 @@ public sealed class AppState
     public bool HideLinkedNotesFromCapsules { get; set; }
     public bool RunLinkedScriptCapsulesOnClick { get; set; }
     public int MaxTitleLength { get; set; } = PaperTitles.DefaultMaxTitleLength;
-    public bool UseCapsuleCollapseAll { get; set; } = true;
-    public bool CapsuleCollapseAllActive { get; set; }
-    public Dictionary<string, bool> CapsuleCollapseAllActiveQueues { get; set; } = new();
     public bool ShowDeepCapsuleWhileExpanded { get; set; } = true;
     public bool HideEdgeCapsuleCloseButtonOnHover { get; set; }
     public bool CollapseExpandedDeepCapsuleOnClick { get; set; }
@@ -466,6 +463,12 @@ public sealed class AppState
     // queue. Old configs (no per-queue entries) keep behaving exactly as the single global margin.
     public Dictionary<string, double> DeepCapsuleQueueStartTopMargins { get; set; } = new();
     public bool RememberDeepCapsuleExpandedPosition { get; set; } = true;
+
+    // Optional daily export for personal Obsidian vaults. Empty vault path keeps this disabled.
+    public string ObsidianVaultPath { get; set; } = "";
+    public string ObsidianOutputDirectory { get; set; } = "Daily";
+    public TimeSpan ObsidianSyncTime { get; set; } = new(23, 0, 0);
+    public DateTimeOffset? LastObsidianSyncAt { get; set; }
 
     // Which screen edge the deep-capsule stack docks to. "left" or "right" (default).
     public string DeepCapsuleSide { get; set; } = DeepCapsuleSides.Right;
@@ -547,6 +550,11 @@ public sealed class PaperData
 
     public List<PaperItem> Items { get; set; } = new();
     public string Content { get; set; } = "";
+    public string Tags { get; set; } = "";
+    // Existing papers have no historical timestamp. Keep that unknown instead of
+    // treating them as newly edited when this feature is introduced.
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.MinValue;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.MinValue;
 }
 
 public sealed class PaperItem

@@ -29,6 +29,19 @@ public sealed class TodoTextBox : TextBox
         set => SetValue(IsDoneProperty, value);
     }
 
+    public static readonly DependencyProperty PlaceholderProperty =
+        DependencyProperty.Register(
+            nameof(Placeholder),
+            typeof(string),
+            typeof(TodoTextBox),
+            new FrameworkPropertyMetadata("", FrameworkPropertyMetadataOptions.AffectsRender));
+
+    public string Placeholder
+    {
+        get => (string)GetValue(PlaceholderProperty);
+        set => SetValue(PlaceholderProperty, value);
+    }
+
     protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e)
     {
         base.OnPreviewMouseLeftButtonDown(e);
@@ -43,9 +56,37 @@ public sealed class TodoTextBox : TextBox
         e.Handled = true;
     }
 
+    protected override void OnGotKeyboardFocus(KeyboardFocusChangedEventArgs e)
+    {
+        base.OnGotKeyboardFocus(e);
+        InvalidateVisual();
+    }
+
+    protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
+    {
+        base.OnLostKeyboardFocus(e);
+        InvalidateVisual();
+    }
+
     protected override void OnRender(DrawingContext drawingContext)
     {
         base.OnRender(drawingContext);
+
+        if (!IsDone && !IsKeyboardFocused && string.IsNullOrEmpty(Text) && !string.IsNullOrWhiteSpace(Placeholder))
+        {
+            var dpi = VisualTreeHelper.GetDpi(this);
+            var hint = new FormattedText(
+                Placeholder,
+                System.Globalization.CultureInfo.CurrentUICulture,
+                FlowDirection,
+                new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
+                FontSize,
+                Theme.WeakTextBrush,
+                null,
+                AppTypography.TextFormattingMode,
+                dpi.PixelsPerDip);
+            drawingContext.DrawText(hint, new Point(Padding.Left, Padding.Top));
+        }
 
         if (!IsDone || ActualWidth <= 0 || ActualHeight <= 0)
         {

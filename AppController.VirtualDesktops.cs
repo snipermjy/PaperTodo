@@ -160,12 +160,6 @@ public sealed partial class AppController
             }
         }
 
-        if (_masterCapsules.TryGetValue(queueKey, out var master))
-        {
-            _ = master.TryMoveToVirtualDesktop(
-                adapter,
-                desktopId);
-        }
     }
 
     private string ExperimentalVirtualDesktopStatusText()

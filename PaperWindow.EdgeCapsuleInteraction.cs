@@ -1148,8 +1148,7 @@ public sealed partial class PaperWindow
 
         var geometry = DeepCapsuleMonitorGeometry();
         var centerY = geometry.DeviceYToLocalDip(dragBounds.Top + dragBounds.Height / 2.0);
-        // Real capsules start after slot 0 when the master capsule occupies that slot.
-        var firstCenterY = DeepCapsuleTopForIndex(_edgeCapsule.Placement.VisualOffset) +
+        var firstCenterY = DeepCapsuleTopForIndex(0) +
             (PaperLayoutDefaults.CapsuleHeight / 2);
         var slotHeight = PaperLayoutDefaults.CapsuleHeight + DeepCapsuleGap;
         var originalIndex = Math.Clamp(_edgeCapsule.Placement.Index, 0, count - 1);

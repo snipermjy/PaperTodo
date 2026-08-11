@@ -347,7 +347,6 @@ public sealed class StateStore
         state.Papers ??= new List<PaperData>();
         RemoveNullEntriesInPlace(state.Papers);
 
-        state.CapsuleCollapseAllActiveQueues ??= new Dictionary<string, bool>();
         state.GlobalHotkeys ??= new Dictionary<string, string>();
         state.GlobalHotkeyEnabled ??= new Dictionary<string, bool>();
         state.DeepCapsuleQueueStartTopMargins ??= new Dictionary<string, double>();
@@ -368,6 +367,7 @@ public sealed class StateStore
             RemoveNullEntriesInPlace(paper.Items);
 
             paper.Content ??= "";
+            paper.Tags ??= "";
             paper.X = NormalizeCoordinate(paper.X, 120);
             paper.Y = NormalizeCoordinate(paper.Y, 120);
             if (!IsFinite(paper.TextZoom))
@@ -511,61 +511,14 @@ public sealed class StateStore
         state.GlobalHotkeys = GlobalShortcutCatalog.NormalizeBindings(state.GlobalHotkeys);
         state.GlobalHotkeyEnabled = GlobalShortcutCatalog.NormalizeEnabled(state.GlobalHotkeyEnabled);
 
-        if (!state.UseCapsuleMode || !state.UseDeepCapsuleMode)
-        {
-            state.UseCapsuleCollapseAll = false;
-        }
-
-        if (!state.UseCapsuleCollapseAll)
-        {
-            state.CapsuleCollapseAllActive = false;
-        }
-        state.CapsuleCollapseAllActiveQueues ??= new Dictionary<string, bool>();
-        state.CapsuleCollapseAllActiveQueues = NormalizeCollapseAllActiveQueues(state.CapsuleCollapseAllActiveQueues);
-        if (!state.UseCapsuleCollapseAll)
-        {
-            state.CapsuleCollapseAllActiveQueues.Clear();
-        }
-        else
-        {
-            foreach (var key in state.CapsuleCollapseAllActiveQueues.Keys.ToList())
-            {
-                if (!state.CapsuleCollapseAllActiveQueues[key])
-                {
-                    state.CapsuleCollapseAllActiveQueues.Remove(key);
-                }
-            }
-            if (state.CapsuleCollapseAllActiveQueues.Count > 0)
-            {
-                state.CapsuleCollapseAllActive = true;
-            }
-        }
-
-        var keepDeepCapsuleStartTopMargins = state.UseCapsuleMode && state.UseDeepCapsuleMode && state.UseCapsuleCollapseAll;
-        state.DeepCapsuleStartTopMargin = keepDeepCapsuleStartTopMargins
-            ? NormalizeDeepCapsuleStartTopMargin(state.DeepCapsuleStartTopMargin, state.DeepCapsuleMonitorDeviceName)
-            : EdgeCapsuleLayout.StartTopMargin;
+        state.DeepCapsuleStartTopMargin = EdgeCapsuleLayout.StartTopMargin;
 
         // Per-queue margins: drop NaN/inf; final clamping against each queue's live work area is
         // done at layout time (monitor set can change between sessions, so we don't over-normalize
         // here). A null dict (older config) becomes empty => every queue falls back to the global.
         state.DeepCapsuleQueueStartTopMargins ??= new Dictionary<string, double>();
         state.DeepCapsuleQueueStartTopMargins = NormalizeQueueStartTopMargins(state.DeepCapsuleQueueStartTopMargins);
-        if (!keepDeepCapsuleStartTopMargins)
-        {
-            state.DeepCapsuleQueueStartTopMargins.Clear();
-        }
-        else
-        {
-            foreach (var key in state.DeepCapsuleQueueStartTopMargins.Keys.ToList())
-            {
-                var v = state.DeepCapsuleQueueStartTopMargins[key];
-                if (double.IsNaN(v) || double.IsInfinity(v))
-                {
-                    state.DeepCapsuleQueueStartTopMargins.Remove(key);
-                }
-            }
-        }
+        state.DeepCapsuleQueueStartTopMargins.Clear();
     }
 
     private static void NormalizePapers(AppState state)
@@ -639,6 +592,7 @@ public sealed class StateStore
             paper.Items ??= new List<PaperItem>();
             RemoveNullEntriesInPlace(paper.Items);
             paper.Content ??= "";
+            paper.Tags ??= "";
             if (!state.UseCapsuleMode)
             {
                 paper.IsCollapsed = false;

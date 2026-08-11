@@ -3092,7 +3092,7 @@ public sealed partial class PaperWindow : Window
 
     private static Button IconButton(string text, string tooltip)
     {
-        return new Button
+        var button = new Button
         {
             Content = text,
             ToolTip = tooltip,
@@ -3101,6 +3101,8 @@ public sealed partial class PaperWindow : Window
             Margin = new Thickness(1, 0, 1, 0),
             Style = BuildIconButtonStyle()
         };
+        System.Windows.Automation.AutomationProperties.SetName(button, tooltip);
+        return button;
     }
 
     private static FrameworkElement CreateTopmostPinIcon(Button owner, bool pinned)
